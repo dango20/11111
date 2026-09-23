@@ -1,0 +1,32 @@
+name: APK 빌드
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: jsPDF 내려받기
+        run: curl -fsSL https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js -o app/src/main/assets/jspdf.umd.min.js
+
+      - name: APK 빌드
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: APK 이름 정리
+        run: cp app/build/outputs/apk/debug/app-debug.apk napjak-scanner.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: napjak-scanner-apk
+          path: napjak-scanner.apk
